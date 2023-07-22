@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Docker\Tests\Resource;
 
+use ArrayObject;
 use Docker\API\Model\ContainersCreatePostBody;
 use Docker\API\Model\ContainersIdExecPostBody;
 use Docker\API\Model\ExecIdJsonGetResponse200;
@@ -11,6 +12,9 @@ use Docker\API\Model\ExecIdStartPostBody;
 use Docker\Stream\DockerRawStream;
 use Docker\Tests\TestCase;
 
+/**
+ * @internal
+ */
 class ExecResourceTest extends TestCase
 {
     /**
@@ -38,7 +42,7 @@ class ExecResourceTest extends TestCase
 
         $stream = $this->getManager()->execStart($execCreateResult->getId(), $execStartConfig);
 
-        $this->assertInstanceOf(DockerRawStream::class, $stream);
+        self::assertInstanceOf(DockerRawStream::class, $stream);
 
         $stdoutFull = '';
         $stream->onStdout(function ($stdout) use (&$stdoutFull): void {
@@ -46,7 +50,7 @@ class ExecResourceTest extends TestCase
         });
         $stream->wait();
 
-        $this->assertSame("output\n", $stdoutFull);
+        self::assertSame("output\n", $stdoutFull);
 
         self::getDocker()->containerKill($createContainerResult->getId(), [
             'signal' => 'SIGKILL',
@@ -69,7 +73,7 @@ class ExecResourceTest extends TestCase
 
         $execFindResult = $this->getManager()->execInspect($execCreateResult->getId());
 
-        $this->assertInstanceOf(ExecIdJsonGetResponse200::class, $execFindResult);
+        self::assertInstanceOf(ExecIdJsonGetResponse200::class, $execFindResult);
 
         self::getDocker()->containerKill($createContainerResult->getId(), [
             'signal' => 'SIGKILL',
@@ -82,7 +86,7 @@ class ExecResourceTest extends TestCase
         $containerConfig->setImage('busybox:latest');
         $containerConfig->setCmd(['sh']);
         $containerConfig->setOpenStdin(true);
-        $containerConfig->setLabels(new \ArrayObject(['docker-php-test' => 'true']));
+        $containerConfig->setLabels(new ArrayObject(['docker-php-test' => 'true']));
 
         $containerCreateResult = self::getDocker()->containerCreate($containerConfig);
         self::getDocker()->containerStart($containerCreateResult->getId());

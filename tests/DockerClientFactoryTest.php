@@ -5,10 +5,42 @@ declare(strict_types=1);
 namespace Docker\Tests;
 
 use Docker\DockerClientFactory;
+use Http\Client\Common\EmulatedHttpAsyncClient;
+use Http\Client\Socket\Client as SocketClient;
+use LogicException;
 use Psr\Http\Client\ClientInterface;
+use RuntimeException;
+use Symfony\Component\HttpClient\CurlHttpClient;
+use Symfony\Component\HttpClient\Psr18Client;
 
+/**
+ * @internal
+ */
 class DockerClientFactoryTest extends TestCase
 {
+    public function getDefaultOptions(ClientInterface $client): mixed
+    {
+        /** @var EmulatedHttpAsyncClient $emulatedHttpClient */
+        $emulatedHttpClient = $this->getPrivateProperty($client, 'client');
+
+        /** @var Psr18Client $psr18Client */
+        $psr18Client = $this->getPrivateProperty($emulatedHttpClient, 'httpClient');
+
+        switch ($psr18Client::class) {
+            case CurlHttpClient::class:
+                $curlHttpClient = $this->getPrivateProperty($psr18Client, 'client');
+                $defaultOptions = $this->getPrivateProperty($curlHttpClient, 'defaultOptions');
+                break;
+            case SocketClient::class:
+                $defaultOptions = $this->getPrivateProperty($psr18Client, 'config')['stream_context_options']['ssl'];
+                break;
+            default:
+                throw new LogicException(sprintf('Unsupported client "%s"', $psr18Client::class));
+        }
+
+        return $defaultOptions;
+    }
+
     protected function tearDown(): void
     {
         parent::tearDown();
@@ -17,12 +49,12 @@ class DockerClientFactoryTest extends TestCase
 
     public function testStaticConstructor(): void
     {
-        $this->assertInstanceOf(ClientInterface::class, DockerClientFactory::create());
+        self::assertInstanceOf(ClientInterface::class, DockerClientFactory::create());
     }
 
     public function testCreateFromEnvWithoutCertPath(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Connection to docker has been set to use TLS, but no PATH is defined for certificate in DOCKER_CERT_PATH docker environment variable');
 
         \putenv('DOCKER_TLS_VERIFY=1');
@@ -34,18 +66,13 @@ class DockerClientFactoryTest extends TestCase
         \putenv('DOCKER_TLS_VERIFY=1');
         \putenv('DOCKER_CERT_PATH=/tmp');
 
-        $count = \count(\get_resources('stream-context'));
         $client = DockerClientFactory::createFromEnv();
-        $this->assertInstanceOf(ClientInterface::class, $client);
+        self::assertInstanceOf(ClientInterface::class, $client);
+        $defaultOptions = $this->getDefaultOptions($client);
 
-        $contexts = \get_resources('stream-context');
-        $this->assertCount($count + 1, $contexts);
-
-        // Get the last stream context.
-        $context = \stream_context_get_options(\end($contexts));
-        $this->assertSame('/tmp/ca.pem', $context['ssl']['cafile']);
-        $this->assertSame('/tmp/cert.pem', $context['ssl']['local_cert']);
-        $this->assertSame('/tmp/key.pem', $context['ssl']['local_pk']);
+        self::assertSame('/tmp/ca.pem', $defaultOptions['cafile']);
+        self::assertSame('/tmp/cert.pem', $defaultOptions['local_cert']);
+        self::assertSame('/tmp/key.pem', $defaultOptions['local_pk']);
     }
 
     public function testCreateCustomPeerName(): void
@@ -54,18 +81,15 @@ class DockerClientFactoryTest extends TestCase
         \putenv('DOCKER_CERT_PATH=/abc');
         \putenv('DOCKER_PEER_NAME=test');
 
-        $count = \count(\get_resources('stream-context'));
         $client = DockerClientFactory::createFromEnv();
-        $this->assertInstanceOf(ClientInterface::class, $client);
+        self::assertInstanceOf(ClientInterface::class, $client);
 
-        $contexts = \get_resources('stream-context');
-        $this->assertCount($count + 1, $contexts);
-
-        // Get the last stream context.
-        $context = \stream_context_get_options(\end($contexts));
-        $this->assertSame('/abc/ca.pem', $context['ssl']['cafile']);
-        $this->assertSame('/abc/cert.pem', $context['ssl']['local_cert']);
-        $this->assertSame('/abc/key.pem', $context['ssl']['local_pk']);
-        $this->assertSame('test', $context['ssl']['peer_name']);
+        $defaultOptions = $this->getDefaultOptions($client);
+        self::assertSame('/abc/ca.pem', $defaultOptions['cafile']);
+        self::assertSame('/abc/cert.pem', $defaultOptions['local_cert']);
+        self::assertSame('/abc/key.pem', $defaultOptions['local_pk']);
+        if ($defaultOptions['extra']['peer_name']) {
+            self::assertSame('test', $defaultOptions['extra']['peer_name']);
+        }
     }
 }

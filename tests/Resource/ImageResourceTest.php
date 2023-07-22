@@ -7,8 +7,14 @@ namespace Docker\Tests\Resource;
 use Docker\API\Client;
 use Docker\API\Model\AuthConfig;
 use Docker\Context\ContextBuilder;
+use Docker\Stream\BuildStream;
+use Docker\Stream\CreateImageStream;
+use Docker\Stream\PushStream;
 use Docker\Tests\TestCase;
 
+/**
+ * @internal
+ */
 class ImageResourceTest extends TestCase
 {
     /**
@@ -28,7 +34,7 @@ class ImageResourceTest extends TestCase
         $context = $contextBuilder->getContext();
         $buildStream = $this->getManager()->imageBuild($context->read(), ['t' => 'test-image']);
 
-        $this->assertInstanceOf('Docker\Stream\BuildStream', $buildStream);
+        self::assertInstanceOf(BuildStream::class, $buildStream);
 
         $lastMessage = '';
 
@@ -37,7 +43,7 @@ class ImageResourceTest extends TestCase
         });
         $buildStream->wait();
 
-        $this->assertStringContainsString('Successfully', $lastMessage);
+        self::assertStringContainsString('Successfully', $lastMessage);
     }
 
     public function testCreate(): void
@@ -46,18 +52,18 @@ class ImageResourceTest extends TestCase
             'fromImage' => 'registry:latest',
         ]);
 
-        $this->assertInstanceOf('Docker\Stream\CreateImageStream', $createImageStream);
+        self::assertInstanceOf(CreateImageStream::class, $createImageStream);
 
         $firstMessage = null;
 
         $createImageStream->onFrame(function ($createImageInfo) use (&$firstMessage): void {
-            if (null === $firstMessage) {
+            if ($firstMessage === null) {
                 $firstMessage = $createImageInfo->getStatus();
             }
         });
         $createImageStream->wait();
 
-        $this->assertStringContainsString('Pulling from library/registry', $firstMessage);
+        self::assertStringContainsString('Pulling from library/registry', $firstMessage);
     }
 
     public function testPushStream(): void
@@ -75,17 +81,17 @@ class ImageResourceTest extends TestCase
             'X-Registry-Auth' => $registryConfig,
         ]);
 
-        $this->assertInstanceOf('Docker\Stream\PushStream', $pushImageStream);
+        self::assertInstanceOf(PushStream::class, $pushImageStream);
 
         $firstMessage = null;
 
         $pushImageStream->onFrame(function ($pushImageInfo) use (&$firstMessage): void {
-            if (null === $firstMessage) {
+            if ($firstMessage === null) {
                 $firstMessage = $pushImageInfo->getStatus();
             }
         });
         $pushImageStream->wait();
 
-        $this->assertStringContainsString('repository [localhost:5000/test-image]', $firstMessage);
+        self::assertStringContainsString('repository [localhost:5000/test-image]', $firstMessage);
     }
 }

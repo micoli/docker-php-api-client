@@ -12,8 +12,7 @@ use Symfony\Component\Serializer\SerializerInterface;
  */
 abstract class MultiJsonStream extends CallbackStream
 {
-    /** @var SerializerInterface Serializer to decode incoming json object */
-    private $serializer;
+    private SerializerInterface $serializer;
 
     public function __construct(StreamInterface $stream, SerializerInterface $serializer)
     {
@@ -22,10 +21,7 @@ abstract class MultiJsonStream extends CallbackStream
         $this->serializer = $serializer;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function readFrame()
+    protected function readFrame(): mixed
     {
         $jsonFrameEnd = false;
         $lastJsonChar = '';
@@ -37,7 +33,7 @@ abstract class MultiJsonStream extends CallbackStream
         while (!$jsonFrameEnd && !$this->stream->eof()) {
             $jsonChar = $this->stream->read(1);
 
-            if ('"' === $jsonChar && '\\' !== $lastJsonChar) {
+            if ($jsonChar === '"' && $lastJsonChar !== '\\') {
                 $inquote = !$inquote;
             }
 
@@ -53,7 +49,7 @@ abstract class MultiJsonStream extends CallbackStream
             if (!$inquote && \in_array($jsonChar, ['}', ']'], true)) {
                 --$level;
 
-                if (0 === $level) {
+                if ($level === 0) {
                     $jsonFrameEnd = true;
                     $jsonFrame .= $jsonChar;
                     $lastJsonChar = '';
@@ -70,7 +66,7 @@ abstract class MultiJsonStream extends CallbackStream
             return null;
         }
 
-        return $this->serializer->deserialize($jsonFrame, 'Docker\\API\\Model\\'.$this->getDecodeClass(), 'json');
+        return $this->serializer->deserialize($jsonFrame, 'Docker\\API\\Model\\' . $this->getDecodeClass(), 'json');
     }
 
     /**

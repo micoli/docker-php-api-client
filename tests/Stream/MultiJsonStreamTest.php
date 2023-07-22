@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Docker\Tests\Stream;
 
-use Docker\API\Model\BuildInfo;
 use Docker\Stream\MultiJsonStream;
 use Docker\Tests\TestCase;
 use Nyholm\Psr7\Stream;
 use Symfony\Component\Serializer\SerializerInterface;
 
+/**
+ * @internal
+ */
 class MultiJsonStreamTest extends TestCase
 {
-    public function jsonStreamDataProvider()
+    public static function jsonStreamDataProvider(): iterable
     {
         return [
             [
@@ -31,8 +33,6 @@ class MultiJsonStreamTest extends TestCase
     }
 
     /**
-     * @param $jsonStream
-     * @param $jsonParts
      * @dataProvider jsonStreamDataProvider
      */
     public function testReadJsonEscapedDoubleQuote(string $jsonStream, array $jsonParts): void
@@ -44,13 +44,16 @@ class MultiJsonStreamTest extends TestCase
             ->getMock();
 
         $serializer
-            ->expects($this->exactly(\count($jsonParts)))
+            ->expects(self::exactly(\count($jsonParts)))
             ->method('deserialize')
-                ->withConsecutive(...\array_map(fn ($part) => [$part, BuildInfo::class, 'json', []], $jsonParts))
+                ->willReturnCallback(function ($part) use ($jsonParts): void {
+                    static $counter = 0;
+                    self::assertSame($part, $jsonParts[$counter++]);
+                })
         ;
 
         $stub = $this->getMockForAbstractClass(MultiJsonStream::class, [$stream, $serializer]);
-        $stub->expects($this->any())
+        $stub->expects(self::any())
             ->method('getDecodeClass')
             ->willReturn('BuildInfo');
 

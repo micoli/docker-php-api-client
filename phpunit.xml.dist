@@ -4,19 +4,24 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
     backupGlobals="false"
-    backupStaticAttributes="false"
     colors="true"
-    convertErrorsToExceptions="true"
-    convertNoticesToExceptions="true"
-    convertWarningsToExceptions="true"
-    processIsolation="false"
+    processIsolation="true"
     stopOnFailure="false"
     bootstrap="vendor/autoload.php">
   <coverage>
+    <report>
+      <clover outputFile="./report/coverage/clover.xml"/>
+      <php outputFile="./report/coverage/coverage.php"/>
+      <text outputFile="./report/coverage/coverage.txt" showUncoveredFiles="false" showOnlySummary="true"/>
+      <html outputDirectory="./report/coverage/html/"/>
+      <xml outputDirectory="./report/coverage/xml/"/>
+    </report>
+  </coverage>
+  <source>
     <include>
       <directory suffix=".php">src</directory>
     </include>
-  </coverage>
+  </source>
   <testsuites>
     <testsuite name="Docker PHP Tests Suite">
       <directory>tests/</directory>

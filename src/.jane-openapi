@@ -1,0 +1,11 @@
+<?php
+
+return [
+  'date-prefer-interface' => true,
+  'directory'             => __DIR__ . '/API/',
+  'namespace'             => 'Docker\\API',
+  'openapi-file'          => __DIR__ . '/v1.41.json',
+  'reference'             => true,
+  'strict'                => false,
+  'date-input-format'     => 'Y-m-d\TH:i:s.uuP',
+];

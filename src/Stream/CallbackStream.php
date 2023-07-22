@@ -8,9 +8,10 @@ use Psr\Http\Message\StreamInterface;
 
 abstract class CallbackStream
 {
-    protected $stream;
+    protected StreamInterface $stream;
 
-    private $onNewFrameCallables = [];
+    /** @var callable[] array  */
+    private array $onNewFrameCallables = [];
 
     public function __construct(StreamInterface $stream)
     {
@@ -27,10 +28,8 @@ abstract class CallbackStream
 
     /**
      * Read a frame in the stream.
-     *
-     * @return mixed
      */
-    abstract protected function readFrame();
+    abstract protected function readFrame(): mixed;
 
     /**
      * Wait for stream to finish and call callables if defined.
@@ -40,7 +39,7 @@ abstract class CallbackStream
         while (!$this->stream->eof()) {
             $frame = $this->readFrame();
 
-            if (null !== $frame) {
+            if ($frame !== null) {
                 if (!\is_array($frame)) {
                     $frame = [$frame];
                 }

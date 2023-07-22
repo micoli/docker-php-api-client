@@ -1,5 +1,5 @@
 {
-    "name": "beluga-php/docker-php",
+    "name": "micoli/docker-php-api-client",
     "license": "MIT",
     "type": "library",
     "description": "A Docker PHP client",
@@ -8,7 +8,8 @@
         "sort-packages": true,
         "preferred-install": "dist",
         "allow-plugins": {
-            "infection/extension-installer": true
+            "infection/extension-installer": true,
+            "php-http/discovery": true
         }
     },
     "minimum-stability": "dev",
@@ -23,74 +24,56 @@
             "Docker\\Tests\\": "tests/"
         }
     },
-    "funding": [
-        {
-            "type": "github",
-            "url": "https://github.com/flavioheleno"
-        },
-        {
-            "type": "patreon",
-            "url": "https://www.patreon.com/flavioheleno"
-        }
-    ],
     "require": {
         "php": ">=8.1",
-        "beluga-php/docker-php-api": "7.1.41.x-dev",
-        "nyholm/psr7": "^1.3",
-        "php-http/client-common": "^2.3",
-        "php-http/socket-client": "^2.0",
+        "jane-php/open-api-runtime": "^7.4",
+        "php-http/socket-client": "^2.1",
         "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
         "psr/http-message": "^1.0",
-        "symfony/filesystem": "^6.1",
-        "symfony/process": "^6.1"
+        "symfony/filesystem": "^6.0",
+        "symfony/http-client": "^6.0",
+        "thecodingmachine/safe": "^2.5"
     },
     "suggest": {
         "php-http/httplug-bundle": "For integration with Symfony"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.8",
-        "infection/infection": "^0.26",
+        "friendsofphp/php-cs-fixer": "^v3.20.0",
+        "jane-php/json-schema": "^7.4",
+        "jane-php/open-api-3": "^7.4",
         "php-parallel-lint/php-parallel-lint": "^1.2",
-        "phpstan/phpstan": "^1.0",
-        "phpunit/phpunit": "^9.5",
-        "psy/psysh": "^0.11",
-        "roave/security-advisories": "dev-master",
-        "squizlabs/php_codesniffer": "^3.5",
-        "vimeo/psalm": "^4.3"
+        "phpstan/phpstan-symfony": "1.3.2",
+        "phpunit/phpunit": "^10.2"
     },
     "conflict": {
         "docker-php/docker-php": "*"
     },
     "scripts": {
+        "generate-docker-api": "vendor/bin/jane-openapi generate --config-file src/.jane-openapi",
         "php-cs-fixer": "vendor/bin/php-cs-fixer fix --dry-run --verbose --diff",
         "php-cs-fixer-fix": "vendor/bin/php-cs-fixer fix --verbose",
-        "console": "vendor/bin/psysh",
         "infection": "vendor/bin/infection",
         "lint": "vendor/bin/parallel-lint --exclude vendor .",
-        "phpcs": "vendor/bin/phpcs --standard=ruleset.xml src/ tests/",
-        "phpstan": "vendor/bin/phpstan analyse --level=max --autoload-file=vendor/autoload.php src/",
-        "phpunit": "vendor/bin/phpunit ./tests/ --coverage-html=./report/coverage/ --whitelist=./src/ --testdox-html=./report/testdox.html --disallow-test-output --process-isolation",
-        "psalm": "vendor/bin/psalm --taint-analysis",
-        "test-ci": "vendor/bin/phpunit ./tests/ --disallow-test-output --process-isolation",
-        "test-coverage": "vendor/bin/phpunit ./tests/ --whitelist=./src/ --coverage-clover=clover.xml",
+        "phpunit": "vendor/bin/phpunit ./tests/",
+        "phpstan": "vendor/bin/phpstan analyse",
         "test": [
-            "@infection",
             "@lint",
-            "@phpunit",
             "@phpstan",
-            "@psalm",
-            "@phpcs"
+            "@phpunit"
+        ],
+        "test-ci": [
+            "@lint",
+            "@phpstan",
+            "@phpunit"
         ]
     },
     "scripts-descriptions": {
-        "console": "Runs PsySH Console",
         "infection": "Runs mutation test framework",
         "lint": "Runs complete codebase lint testing",
         "phpcs": "Runs coding style checking",
         "phpstan": "Runs complete codebase static analysis",
         "phpunit": "Runs library test suite",
-        "psalm": "Runs complete codebase taint analysis",
-        "test-ci": "Runs library test suite (for continuous integration)",
         "test-coverage": "Runs test-coverage analysis",
         "test": "Runs all tests"
     },

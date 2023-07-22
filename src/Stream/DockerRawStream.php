@@ -6,21 +6,23 @@ namespace Docker\Stream;
 
 use Psr\Http\Message\StreamInterface;
 
+use function Safe\unpack;
+
 class DockerRawStream
 {
     public const HEADER = 'application/vnd.docker.raw-stream';
 
     /** @var StreamInterface Stream for the response */
-    protected $stream;
+    protected StreamInterface $stream;
 
     /** @var callable[] A list of callable to call when there is a stdin output */
-    protected $onStdinCallables = [];
+    protected array $onStdinCallables = [];
 
     /** @var callable[] A list of callable to call when there is a stdout output */
-    protected $onStdoutCallables = [];
+    protected array $onStdoutCallables = [];
 
     /** @var callable[] A list of callable to call when there is a stderr output */
-    protected $onStderrCallables = [];
+    protected array $onStderrCallables = [];
 
     public function __construct(StreamInterface $stream)
     {
@@ -62,19 +64,19 @@ class DockerRawStream
             return;
         }
 
-        $decoded = \unpack('C1type/C3/N1size', $header);
+        $decoded = unpack('C1type/C3/N1size', $header);
         $output = $this->forceRead($decoded['size']);
         $callbackList = [];
 
-        if (0 === $decoded['type']) {
+        if ($decoded['type'] === 0) {
             $callbackList = $this->onStdinCallables;
         }
 
-        if (1 === $decoded['type']) {
+        if ($decoded['type'] === 1) {
             $callbackList = $this->onStdoutCallables;
         }
 
-        if (2 === $decoded['type']) {
+        if ($decoded['type'] === 2) {
             $callbackList = $this->onStderrCallables;
         }
 
@@ -85,12 +87,8 @@ class DockerRawStream
 
     /**
      * Force to have something of the expected size (block).
-     *
-     * @param $length
-     *
-     * @return string
      */
-    private function forceRead($length)
+    private function forceRead(int $length):string
     {
         $read = '';
 

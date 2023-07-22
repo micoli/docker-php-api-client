@@ -11,7 +11,7 @@ use Psr\Http\Message\StreamInterface;
  */
 class TarStream implements StreamInterface
 {
-    protected $stream;
+    protected StreamInterface $stream;
 
     public function __construct(StreamInterface $stream)
     {
@@ -33,9 +33,6 @@ class TarStream implements StreamInterface
         return $this->stream->detach();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSize()
     {
         return null;

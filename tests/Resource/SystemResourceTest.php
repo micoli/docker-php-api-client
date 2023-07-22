@@ -7,6 +7,9 @@ namespace Docker\Tests\Resource;
 use Docker\API\Model\EventsGetResponse200;
 use Docker\Tests\TestCase;
 
+/**
+ * @internal
+ */
 class SystemResourceTest extends TestCase
 {
     /**
@@ -36,6 +39,6 @@ class SystemResourceTest extends TestCase
 
         $stream->wait();
 
-        $this->assertInstanceOf(EventsGetResponse200::class, $lastEvent);
+        self::assertInstanceOf(EventsGetResponse200::class, $lastEvent);
     }
 }

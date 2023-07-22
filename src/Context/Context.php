@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Docker\Context;
 
+use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
+
+use function Safe\file_get_contents;
 
 /**
  * Docker\Context\Context.
@@ -28,7 +31,7 @@ class Context implements ContextInterface
     private $directory;
 
     /**
-     * @var process Tar process
+     * @var process|resource Tar process
      */
     private $process;
 
@@ -86,7 +89,7 @@ class Context implements ContextInterface
      */
     public function getDockerfileContent()
     {
-        return \file_get_contents($this->directory.\DIRECTORY_SEPARATOR.'Dockerfile');
+        return file_get_contents($this->directory . \DIRECTORY_SEPARATOR . 'Dockerfile');
     }
 
     /**
@@ -94,7 +97,7 @@ class Context implements ContextInterface
      */
     public function isStreamed()
     {
-        return self::FORMAT_STREAM === $this->format;
+        return $this->format === self::FORMAT_STREAM;
     }
 
     /**
@@ -132,7 +135,11 @@ class Context implements ContextInterface
     public function toStream()
     {
         if (!\is_resource($this->process)) {
-            $this->process = \proc_open('/usr/bin/env tar -c .', [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $pipes, $this->directory);
+            $resource = \proc_open('/usr/bin/env tar -c .', [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']], $pipes, $this->directory);
+            if ($resource === false) {
+                throw new RuntimeException('Process is not a resource');
+            }
+            $this->process = $resource;
             $this->stream = $pipes[1];
         }
 

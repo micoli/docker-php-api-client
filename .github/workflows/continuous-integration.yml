@@ -4,11 +4,9 @@ on:
   push:
     paths-ignore:
       - 'doc/**'
-      - '.github/**'
   pull_request:
     paths-ignore:
       - 'doc/**'
-      - '.github/**'
 
 jobs:
   phpunit:
@@ -49,22 +47,9 @@ jobs:
         key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
         restore-keys: ${{ runner.os }}-php-${{ matrix.php-version }}-
 
-    - name: Install dependencies (PHP 7)
-      if: steps.composer-cache.outputs.cache-hit != 'true' && matrix.php-version < 8
-      run: composer update --${{ matrix.dependency-version }} --no-progress --no-interaction
-
     - name: Install dependencies (PHP 8)
       if: steps.composer-cache.outputs.cache-hit != 'true' && matrix.php-version >= 8
       run: composer update --${{ matrix.dependency-version }} --ignore-platform-req=php --no-progress --no-interaction
 
-    - name: Run PHPUnit test suite
+    - name: Run test suite
       run: composer run-script test-ci
-
-    - name: Publish code coverage
-      uses: paambaati/codeclimate-action@v3.2.0
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-      with:
-        coverageCommand: composer run-script test-coverage
-        coverageLocations: |
-          ${{github.workspace}}/clover.xml:clover

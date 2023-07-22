@@ -1,47 +1,60 @@
 <?php
 
-$finder = \PhpCsFixer\Finder::create()
-    ->in([
-        __DIR__.'/src',
-        __DIR__.'/tests',
-    ])
-    ->notPath('/fixtures/')
-;
+declare(strict_types=1);
 
-$config = new \PhpCsFixer\Config();
-return $config
-    ->setRules([
-        '@Symfony'                    => true,
-        '@Symfony:risky'              => true,
-        '@PHP56Migration:risky'       => true,
-        '@PHP70Migration'             => true,
-        '@PHP70Migration:risky'       => true,
-        '@PHP71Migration'             => true,
-        '@PHP71Migration:risky'       => true,
-        '@PHP73Migration'             => true,
-        '@PHP74Migration'             => true,
-        '@PHP74Migration:risky'       => true,
-        '@PHP80Migration'             => true,
-        '@PHP80Migration:risky'       => true,
-        '@PHPUnit75Migration:risky'   => true,
-        '@PHPUnit84Migration:risky'   => true,
-        'array_syntax'                => [
-            'syntax' => 'short'
-        ],
-        'combine_consecutive_unsets'  => true,
-        'declare_strict_types'        => true,
-        'linebreak_after_opening_tag' => true,
-        'modernize_types_casting'     => true,
-        'native_function_invocation'  => true,
-        'no_php4_constructor'         => true,
-        'ordered_imports'             => true,
-        'php_unit_strict'             => true,
-        'phpdoc_order'                => true,
-        'strict_comparison'           => true,
-        'strict_param'                => true,
-    ])
+return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
-    ->setIndent('    ')
-    ->setLineEnding("\n")
-    ->setFinder($finder)
-;
+    ->setRules([
+        '@Symfony' => true,
+        '@PHP80Migration' => true,
+        '@PHP80Migration:risky' => true,
+        'declare_strict_types' => true,
+        'phpdoc_align' => false,
+        'phpdoc_summary' => false,
+        'phpdoc_to_comment' => false,
+        'concat_space' => ['spacing' => 'one'],
+        'multiline_whitespace_before_semicolons' => false,
+        'no_useless_else' => true,
+        'no_useless_return' => true,
+        'ordered_imports' => [
+            'sort_algorithm' => 'alpha',
+            'imports_order' => ['class', 'function', 'const'],
+        ],
+        'phpdoc_order' => true,
+        'array_syntax' => ['syntax' => 'short'],
+        'echo_tag_syntax' => ['format' => 'long'],
+        'php_unit_method_casing' => false,
+        'php_unit_set_up_tear_down_visibility' => true,
+        'php_unit_internal_class' => true,
+        'php_unit_test_case_static_method_calls' => ['call_type' => 'self'],
+        'final_internal_class' => false,
+        'increment_style' => ['style' => 'pre'],
+        'return_type_declaration' => ['space_before' => 'none'],
+        'trailing_comma_in_multiline' => ['elements' => ['arrays', 'arguments', 'parameters']],
+        'global_namespace_import' => ['import_classes' => true, 'import_constants' => false, 'import_functions' => false],
+        'void_return' => true,
+        'yoda_style' => [
+            'equal' => false,
+            'identical' => false,
+        ],
+        'class_definition' => [
+            'multi_line_extends_each_single_line' => true,
+        ],
+        'method_argument_space' => [
+            'on_multiline' => 'ensure_fully_multiline',
+        ],
+        'single_line_throw' => false,
+        'compact_nullable_typehint' => true,
+    ])
+    ->setCacheFile('/tmp/backend.php_cs.cache')
+    ->setFinder(
+        PhpCsFixer\Finder::create()
+            ->in([
+                __DIR__ . '/src',
+                __DIR__ . '/tests',
+            ])
+            ->exclude([
+                __DIR__ . 'var',
+            ])
+            ->name('*.php')
+    );

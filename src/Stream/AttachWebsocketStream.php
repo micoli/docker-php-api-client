@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Docker\Stream;
 
 use Psr\Http\Message\StreamInterface;
-
+use function Safe\fwrite;
 /**
  * An interactive stream is used when communicating with an attached docker container.
  *
@@ -15,7 +15,7 @@ use Psr\Http\Message\StreamInterface;
  */
 class AttachWebsocketStream
 {
-    /** @var resource The underlying socket */
+    /** @var resource|null The underlying socket */
     private $socket;
 
     public function __construct(StreamInterface $stream)
@@ -43,7 +43,7 @@ class AttachWebsocketStream
             'data' => $data,
         ];
 
-        if (1 === $frame['mask']) {
+        if ($frame['mask'] === 1) {
             for ($i = 0; $i < $frame['len']; ++$i) {
                 $frame['data'][$i]
                     = \chr(\ord($frame['data'][$i]) ^ \ord($frame['mask_key'][$i % 4]));
@@ -64,16 +64,16 @@ class AttachWebsocketStream
         $this->socketWrite(\chr($firstByte));
         $this->socketWrite(\chr($secondByte));
 
-        if (126 === $len) {
+        if ($len === 126) {
             $this->socketWrite(\pack('n', $frame['len']));
-        } elseif (127 === $len) {
+        } elseif ($len === 127) {
             $higher = $frame['len'] >> 32;
             $lower = ($frame['len'] << 32) >> 32;
             $this->socketWrite(\pack('N', $higher));
             $this->socketWrite(\pack('N', $lower));
         }
 
-        if (1 === $frame['mask']) {
+        if ($frame['mask'] === 1) {
             $this->socketWrite($frame['mask_key']);
         }
 
@@ -87,9 +87,9 @@ class AttachWebsocketStream
      * @param int  $waitMicroTime Time to wait in microseconds before return false
      * @param bool $getFrame      Whether to return the frame of websocket or only the data
      *
-     * @return false|string|array|null Null for socket not available, false for no message, string for the last message and the frame array if $getFrame is set to true
+     * @return false|string|array{}|null Null for socket not available, false for no message, string for the last message and the frame array if $getFrame is set to true
      */
-    public function read($waitTime = 0, $waitMicroTime = 200000, $getFrame = false)
+    public function read(int $waitTime = 0,int  $waitMicroTime = 200000, bool $getFrame = false): false|string|array|null
     {
         if (!\is_resource($this->socket) || \feof($this->socket)) {
             return null;
@@ -99,7 +99,7 @@ class AttachWebsocketStream
         $write = null;
         $expect = null;
 
-        if (0 === \stream_select($read, $write, $expect, $waitTime, $waitMicroTime)) {
+        if (\stream_select($read, $write, $expect, $waitTime, $waitMicroTime) === 0) {
             return false;
         }
 
@@ -120,22 +120,22 @@ class AttachWebsocketStream
         $frame['len'] = ($secondByte & 127);
 
         // Get length of the frame
-        if (126 === $frame['len']) {
+        if ($frame['len'] === 126) {
             $frame['len'] = \unpack('n', $this->socketRead(2))[1];
-        } elseif (127 === $frame['len']) {
-            list($higher, $lower) = \array_values(\unpack('N2', $this->socketRead(8)));
+        } elseif ($frame['len'] === 127) {
+            [$higher, $lower] = \array_values(\unpack('N2', $this->socketRead(8)));
             $frame['len'] = ($higher << 32) | $lower;
         }
 
         // Get the mask key if needed
-        if (1 === $frame['mask']) {
+        if ($frame['mask'] === 1) {
             $frame['mask_key'] = $this->socketRead(4);
         }
 
         $frame['data'] = $this->socketRead($frame['len']);
 
         // Decode data if needed
-        if (1 === $frame['mask']) {
+        if ($frame['mask'] === 1) {
             for ($i = 0; $i < $frame['len']; ++$i) {
                 $frame['data'][$i] = \chr(\ord($frame['data'][$i]) ^ \ord($frame['mask_key'][$i % 4]));
             }
@@ -151,16 +151,16 @@ class AttachWebsocketStream
     /**
      * Force to have something of the expected size (block).
      *
-     * @param $length
-     *
      * @return string
      */
-    private function socketRead($length)
+    private function socketRead(int $length): string
     {
         $read = '';
-
+        assert($this->socket !== null);
         do {
-            $read .= \fread($this->socket, $length - \strlen($read));
+            $chunckLength = $length - \strlen($read);
+            assert($chunckLength>0);
+            $read .= \fread($this->socket, $chunckLength);
         } while (\strlen($read) < $length && !\feof($this->socket));
 
         return $read;
@@ -169,12 +169,11 @@ class AttachWebsocketStream
     /**
      * Write to the socket.
      *
-     * @param $data
-     *
      * @return int
      */
-    private function socketWrite($data)
+    private function socketWrite(string $data): int
     {
-        return \fwrite($this->socket, $data);
+        assert($this->socket !== null);
+        return fwrite($this->socket, $data);
     }
 }

@@ -6,10 +6,13 @@ namespace Docker\Tests;
 
 use Docker\Docker;
 
+/**
+ * @internal
+ */
 class DockerTest extends TestCase
 {
     public function testCreate(): void
     {
-        $this->assertInstanceOf(Docker::class, Docker::create());
+        self::assertInstanceOf(Docker::class, Docker::create());
     }
 }

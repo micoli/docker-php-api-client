@@ -8,6 +8,9 @@ use Docker\Context\Context;
 use Docker\Context\ContextBuilder;
 use Docker\Tests\TestCase;
 
+/**
+ * @internal
+ */
 class ContextBuilderTest extends TestCase
 {
     public function testWritesContextToDisk(): void
@@ -15,7 +18,7 @@ class ContextBuilderTest extends TestCase
         $contextBuilder = new ContextBuilder();
         $context = $contextBuilder->getContext();
 
-        $this->assertFileExists($context->getDirectory().'/Dockerfile');
+        self::assertFileExists($context->getDirectory() . '/Dockerfile');
     }
 
     public function testHasDefaultFrom(): void
@@ -23,7 +26,7 @@ class ContextBuilderTest extends TestCase
         $contextBuilder = new ContextBuilder();
         $context = $contextBuilder->getContext();
 
-        $this->assertStringEqualsFile($context->getDirectory().'/Dockerfile', 'FROM base');
+        self::assertStringEqualsFile($context->getDirectory() . '/Dockerfile', 'FROM base');
     }
 
     public function testUsesCustomFrom(): void
@@ -33,7 +36,7 @@ class ContextBuilderTest extends TestCase
 
         $context = $contextBuilder->getContext();
 
-        $this->assertStringEqualsFile($context->getDirectory().'/Dockerfile', 'FROM ubuntu:precise');
+        self::assertStringEqualsFile($context->getDirectory() . '/Dockerfile', 'FROM ubuntu:precise');
     }
 
     public function testMultipleFrom(): void
@@ -44,7 +47,7 @@ class ContextBuilderTest extends TestCase
         $contextBuilder->from('test');
 
         $content = $contextBuilder->getContext()->getDockerfileContent();
-        $this->assertSame("FROM ubuntu:precise\nFROM test", $content);
+        self::assertSame("FROM ubuntu:precise\nFROM test", $content);
     }
 
     public function testCreatesTmpDirectory(): void
@@ -52,7 +55,7 @@ class ContextBuilderTest extends TestCase
         $contextBuilder = new ContextBuilder();
         $context = $contextBuilder->getContext();
 
-        $this->assertFileExists($context->getDirectory());
+        self::assertFileExists($context->getDirectory());
     }
 
     public function testWriteTmpFiles(): void
@@ -66,14 +69,14 @@ class ContextBuilderTest extends TestCase
             ADD (.+?) /foo#
             DOCKERFILE, '$1', $context->getDockerfileContent());
 
-        $this->assertStringEqualsFile($context->getDirectory().'/'.$filename, 'random content');
+        self::assertStringEqualsFile($context->getDirectory() . '/' . $filename, 'random content');
     }
 
     public function testWriteTmpFileFromStream(): void
     {
         $contextBuilder = new ContextBuilder();
         $stream = \fopen('php://temp', 'r+');
-        $this->assertSame(7, \fwrite($stream, 'test123'));
+        self::assertSame(7, \fwrite($stream, 'test123'));
         \rewind($stream);
         $contextBuilder->addStream('/foo', $stream);
 
@@ -82,7 +85,7 @@ class ContextBuilderTest extends TestCase
             #FROM base
             ADD (.+?) /foo#
             DOCKERFILE, '$1', $context->getDockerfileContent());
-        $this->assertStringEqualsFile($context->getDirectory().'/'.$filename, 'test123');
+        self::assertStringEqualsFile($context->getDirectory() . '/' . $filename, 'test123');
     }
 
     public function testWriteTmpFileFromDisk(): void
@@ -90,7 +93,7 @@ class ContextBuilderTest extends TestCase
         $contextBuilder = new ContextBuilder();
         $file = \tempnam('', '');
         \file_put_contents($file, 'abc');
-        $this->assertStringEqualsFile($file, 'abc');
+        self::assertStringEqualsFile($file, 'abc');
         $contextBuilder->addFile('/foo', $file);
 
         $context = $contextBuilder->getContext();
@@ -98,7 +101,7 @@ class ContextBuilderTest extends TestCase
             #FROM base
             ADD (.+?) /foo#
             DOCKERFILE, '$1', $context->getDockerfileContent());
-        $this->assertStringEqualsFile($context->getDirectory().'/'.$filename, 'abc');
+        self::assertStringEqualsFile($context->getDirectory() . '/' . $filename, 'abc');
     }
 
     public function testWriteTmpDirFromDisk(): void
@@ -107,8 +110,8 @@ class ContextBuilderTest extends TestCase
         $dir = \tempnam(\sys_get_temp_dir(), '');
         \unlink($dir);
         \mkdir($dir);
-        \file_put_contents($dir.'/test', 'abc');
-        $this->assertStringEqualsFile($dir.'/test', 'abc');
+        \file_put_contents($dir . '/test', 'abc');
+        self::assertStringEqualsFile($dir . '/test', 'abc');
         $contextBuilder->addFile('/foo', $dir);
 
         $context = $contextBuilder->getContext();
@@ -116,7 +119,7 @@ class ContextBuilderTest extends TestCase
             #FROM base
             ADD (.+?) /foo#
             DOCKERFILE, '$1', $context->getDockerfileContent());
-        $this->assertStringEqualsFile($context->getDirectory().'/'.$filename.'/test', 'abc');
+        self::assertStringEqualsFile($context->getDirectory() . '/' . $filename . '/test', 'abc');
     }
 
     public function testWritesAddCommands(): void
@@ -126,10 +129,12 @@ class ContextBuilderTest extends TestCase
 
         $context = $contextBuilder->getContext();
 
-        $this->assertMatchesRegularExpression(<<<DOCKERFILE
-            #FROM base
-            ADD .+? /foo#
-            DOCKERFILE, $context->getDockerfileContent()
+        self::assertMatchesRegularExpression(
+            <<<DOCKERFILE
+                #FROM base
+                ADD .+? /foo#
+                DOCKERFILE,
+            $context->getDockerfileContent(),
         );
     }
 
@@ -140,10 +145,12 @@ class ContextBuilderTest extends TestCase
 
         $context = $contextBuilder->getContext();
 
-        $this->assertStringEqualsFile($context->getDirectory().'/Dockerfile', <<<DOCKERFILE
-            FROM base
-            RUN foo command
-            DOCKERFILE
+        self::assertStringEqualsFile(
+            $context->getDirectory() . '/Dockerfile',
+            <<<DOCKERFILE
+                FROM base
+                RUN foo command
+                DOCKERFILE
         );
     }
 
@@ -154,10 +161,12 @@ class ContextBuilderTest extends TestCase
 
         $context = $contextBuilder->getContext();
 
-        $this->assertStringEqualsFile($context->getDirectory().'/Dockerfile', <<<DOCKERFILE
-            FROM base
-            ENV foo bar
-            DOCKERFILE
+        self::assertStringEqualsFile(
+            $context->getDirectory() . '/Dockerfile',
+            <<<DOCKERFILE
+                FROM base
+                ENV foo bar
+                DOCKERFILE
         );
     }
 
@@ -168,10 +177,12 @@ class ContextBuilderTest extends TestCase
 
         $context = $contextBuilder->getContext();
 
-        $this->assertStringEqualsFile($context->getDirectory().'/Dockerfile', <<<DOCKERFILE
-            FROM base
-            COPY /foo /bar
-            DOCKERFILE
+        self::assertStringEqualsFile(
+            $context->getDirectory() . '/Dockerfile',
+            <<<DOCKERFILE
+                FROM base
+                COPY /foo /bar
+                DOCKERFILE
         );
     }
 
@@ -182,24 +193,28 @@ class ContextBuilderTest extends TestCase
 
         $context = $contextBuilder->getContext();
 
-        $this->assertStringEqualsFile($context->getDirectory().'/Dockerfile', <<<DOCKERFILE
-            FROM base
-            WORKDIR /foo
-            DOCKERFILE
+        self::assertStringEqualsFile(
+            $context->getDirectory() . '/Dockerfile',
+            <<<DOCKERFILE
+                FROM base
+                WORKDIR /foo
+                DOCKERFILE
         );
     }
 
     public function testWritesExposeCommands(): void
     {
         $contextBuilder = new ContextBuilder();
-        $contextBuilder->expose('80');
+        $contextBuilder->expose(80);
 
         $context = $contextBuilder->getContext();
 
-        $this->assertStringEqualsFile($context->getDirectory().'/Dockerfile', <<<DOCKERFILE
-            FROM base
-            EXPOSE 80
-            DOCKERFILE
+        self::assertStringEqualsFile(
+            $context->getDirectory() . '/Dockerfile',
+            <<<DOCKERFILE
+                FROM base
+                EXPOSE 80
+                DOCKERFILE
         );
     }
 
@@ -208,11 +223,11 @@ class ContextBuilderTest extends TestCase
         $contextBuilder = new ContextBuilder();
         $contextBuilder->user('user1');
         $content = $contextBuilder->getContext()->getDockerfileContent();
-        $this->assertStringEndsWith("\nUSER user1", $content);
+        self::assertStringEndsWith("\nUSER user1", $content);
 
         $contextBuilder->user('user2');
         $content = $contextBuilder->getContext()->getDockerfileContent();
-        $this->assertStringEndsWith("\nUSER user1\nUSER user2", $content);
+        self::assertStringEndsWith("\nUSER user1\nUSER user2", $content);
     }
 
     public function testWritesVolumeCommands(): void
@@ -220,11 +235,11 @@ class ContextBuilderTest extends TestCase
         $contextBuilder = new ContextBuilder();
         $contextBuilder->volume('volume1');
         $content = $contextBuilder->getContext()->getDockerfileContent();
-        $this->assertStringEndsWith("\nVOLUME volume1", $content);
+        self::assertStringEndsWith("\nVOLUME volume1", $content);
 
         $contextBuilder->volume('volume2');
         $content = $contextBuilder->getContext()->getDockerfileContent();
-        $this->assertStringEndsWith("\nVOLUME volume1\nVOLUME volume2", $content);
+        self::assertStringEndsWith("\nVOLUME volume1\nVOLUME volume2", $content);
     }
 
     public function testWritesCommandCommand(): void
@@ -233,12 +248,12 @@ class ContextBuilderTest extends TestCase
         $contextBuilder->command('test123');
 
         $content = $contextBuilder->getContext()->getDockerfileContent();
-        $this->assertStringEndsWith("\nCMD test123", $content);
+        self::assertStringEndsWith("\nCMD test123", $content);
 
         $contextBuilder->command('changed');
         $content = $contextBuilder->getContext()->getDockerfileContent();
-        $this->assertStringNotContainsString('CMD test123', $content);
-        $this->assertStringEndsWith("\nCMD changed", $content);
+        self::assertStringNotContainsString('CMD test123', $content);
+        self::assertStringEndsWith("\nCMD changed", $content);
     }
 
     public function testWritesEntrypointCommand(): void
@@ -247,12 +262,12 @@ class ContextBuilderTest extends TestCase
         $contextBuilder->entrypoint('test123');
 
         $content = $contextBuilder->getContext()->getDockerfileContent();
-        $this->assertStringEndsWith("\nENTRYPOINT test123", $content);
+        self::assertStringEndsWith("\nENTRYPOINT test123", $content);
 
         $contextBuilder->entrypoint('changed');
         $content = $contextBuilder->getContext()->getDockerfileContent();
-        $this->assertStringNotContainsString('ENTRYPOINT test123', $content);
-        $this->assertStringEndsWith("\nENTRYPOINT changed", $content);
+        self::assertStringNotContainsString('ENTRYPOINT test123', $content);
+        self::assertStringEndsWith("\nENTRYPOINT changed", $content);
     }
 
     public function testTar(): void
@@ -261,8 +276,8 @@ class ContextBuilderTest extends TestCase
         $contextBuilder->setFormat(Context::FORMAT_TAR);
         $context = $contextBuilder->getContext();
         $content = $context->read();
-        $this->assertIsString($content);
-        $this->assertSame($context->toTar(), $content);
+        self::assertIsString($content);
+        self::assertSame($context->toTar(), $content);
     }
 
     public function testTraverseSymlinks(): void
@@ -271,11 +286,11 @@ class ContextBuilderTest extends TestCase
         $dir = \tempnam('', '');
         \unlink($dir);
         \mkdir($dir);
-        $file = $dir.'/test';
+        $file = $dir . '/test';
 
         \file_put_contents($file, 'abc');
 
-        $linkFile = $file.'-symlink';
+        $linkFile = $file . '-symlink';
         \symlink($file, $linkFile);
 
         $contextBuilder->addFile('/foo', $dir);
@@ -288,6 +303,6 @@ class ContextBuilderTest extends TestCase
             DOCKERFILE, '$1', $context->getDockerfileContent());
         \unlink($file);
         $context->setCleanup(false);
-        $this->assertStringEqualsFile($context->getDirectory().'/'.$filename.'/test-symlink', 'abc');
+        self::assertStringEqualsFile($context->getDirectory() . '/' . $filename . '/test-symlink', 'abc');
     }
 }
