@@ -36,7 +36,7 @@ final class DockerClientFactory
      * @param config $config
      * @param array<Plugin> $additionalPlugins
      */
-    public static function create(array $config = [], PluginClientFactory $pluginClientFactory = null, array $additionalPlugins = []): ClientInterface
+    public static function create(array $config = [], ?PluginClientFactory $pluginClientFactory = null, array $additionalPlugins = []): ClientInterface
     {
         $uriFactory = Psr17FactoryDiscovery::findUriFactory();
         $pluginClientFactory ??= new PluginClientFactory();
@@ -64,7 +64,7 @@ final class DockerClientFactory
      * @param config $config
      * @param array<Plugin> $additionalPlugins
      */
-    public static function createFromEnv(PluginClientFactory $pluginClientFactory = null, array $config = [], array $additionalPlugins = []): ClientInterface
+    public static function createFromEnv(?PluginClientFactory $pluginClientFactory = null, array $config = [], array $additionalPlugins = []): ClientInterface
     {
         $config = [
             'remote_socket' => self::getRemoteSocket($config),
@@ -112,6 +112,7 @@ final class DockerClientFactory
 
     /**
      * @param config $config
+     *
      * @return array{string,SocketClient|Psr18Client}
      */
     private static function getHostAndClient(array $config): array

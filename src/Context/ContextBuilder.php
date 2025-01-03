@@ -7,9 +7,9 @@ namespace Docker\Context;
 use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 
-use function Safe\tempnam;
 use function Safe\fopen;
 use function Safe\realpath;
+use function Safe\tempnam;
 
 /**
  * @phpstan-type commandType=array{'type': 'FROM','image': string

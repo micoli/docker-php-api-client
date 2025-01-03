@@ -13,7 +13,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 final class ContainerLogsUntil extends BaseEndpoint
 {
-    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, string $contentType = null): DockerRawStreamUntil|EventsGetResponse200|null
+    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, ?string $contentType = null): DockerRawStreamUntil|EventsGetResponse200|null
     {
         if ($response->getStatusCode() === 200) {
             return new DockerRawStreamUntil(Stream::create($response->getBody()));

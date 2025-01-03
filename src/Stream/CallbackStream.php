@@ -10,7 +10,7 @@ abstract class CallbackStream
 {
     protected StreamInterface $stream;
 
-    /** @var callable[] array  */
+    /** @var callable[] array */
     private array $onNewFrameCallables = [];
 
     public function __construct(StreamInterface $stream)

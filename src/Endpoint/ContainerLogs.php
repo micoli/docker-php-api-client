@@ -13,7 +13,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class ContainerLogs extends BaseEndpoint
 {
-    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, string $contentType = null): DockerRawStream|EventsGetResponse200|null
+    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, ?string $contentType = null): DockerRawStream|EventsGetResponse200|null
     {
         if ($response->getStatusCode() === 200) {
             return new DockerRawStream(Stream::create($response->getBody()));

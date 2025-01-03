@@ -13,7 +13,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class ImageCreate extends BaseEndpoint
 {
-    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, string $contentType = null): CreateImageStream|EventsGetResponse200|null
+    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, ?string $contentType = null): CreateImageStream|EventsGetResponse200|null
     {
         if ($response->getStatusCode() === 200) {
             return new CreateImageStream(Stream::create($response->getBody()), $serializer);
