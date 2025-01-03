@@ -26,22 +26,22 @@
     },
     "require": {
         "php": ">=8.1",
-        "jane-php/open-api-runtime": "^7.4",
-        "php-http/socket-client": "^2.1",
+        "jane-php/open-api-runtime": "^v7.8",
+        "php-http/socket-client": "^2.3.0",
         "psr/http-client": "^1.0",
-        "psr/http-factory": "^1.0",
-        "psr/http-message": "^1.0",
-        "symfony/filesystem": "^6.0",
-        "symfony/http-client": "^6.0",
-        "thecodingmachine/safe": "^2.5"
+        "psr/http-factory": "^1.1",
+        "psr/http-message": "^1.1",
+        "symfony/filesystem": "^6.0 || ^7.0",
+        "symfony/http-client": "^6.0 || ^7.0",
+        "thecodingmachine/safe": "^v2.5"
     },
     "suggest": {
         "php-http/httplug-bundle": "For integration with Symfony"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^v3.20.0",
-        "jane-php/json-schema": "^7.4",
-        "jane-php/open-api-3": "^7.4",
+        "jane-php/json-schema": "^v7.8",
+        "jane-php/open-api-3": "^v7.8",
         "php-parallel-lint/php-parallel-lint": "^1.2",
         "phpstan/phpstan-symfony": "1.3.2",
         "phpunit/phpunit": "^10.2"

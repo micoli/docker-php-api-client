@@ -31,7 +31,7 @@ class ContainerAttachWebsocket extends BaseEndpoint
         );
     }
 
-    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, string $contentType = null): AttachWebsocketStream|EventsGetResponse200|null
+    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, ?string $contentType = null): AttachWebsocketStream|EventsGetResponse200|null
     {
         if ($response->getStatusCode() === 101) {
             return new AttachWebsocketStream(Stream::create($response->getBody()));

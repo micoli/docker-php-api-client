@@ -47,7 +47,7 @@ class Docker extends Client
         return $this->executeEndpoint(new ContainerLogs($id, $queryParameters), $fetch);
     }
 
-    public function execStart(string $id, ExecIdStartPostBody $requestBody = null, string $fetch = self::FETCH_OBJECT)
+    public function execStart(string $id, ?ExecIdStartPostBody $requestBody = null, string $fetch = self::FETCH_OBJECT)
     {
         return $this->executeEndpoint(new ExecStart($id, $requestBody), $fetch);
     }
@@ -65,7 +65,7 @@ class Docker extends Client
      * @param array{}|array{fromImage: string} $queryParameters
      * @param array{} $headerParameters
      */
-    public function imageCreate(string $requestBody = null, array $queryParameters = [], array $headerParameters = [], string $fetch = self::FETCH_OBJECT)
+    public function imageCreate(?string $requestBody = null, array $queryParameters = [], array $headerParameters = [], string $fetch = self::FETCH_OBJECT)
     {
         return $this->executeEndpoint(new ImageCreate($requestBody, $queryParameters, $headerParameters), $fetch);
     }
@@ -94,6 +94,7 @@ class Docker extends Client
 
     /**
      * @phpstan-import-type config from DockerClientFactory
+     *
      * @param DenormalizerInterface[] $additionalNormalizers
      * @param Plugin[] $additionalPlugins
      */

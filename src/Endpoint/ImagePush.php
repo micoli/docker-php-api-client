@@ -18,7 +18,7 @@ class ImagePush extends BaseEndpoint
         return \str_replace(['{name}'], [\urlencode($this->name)], '/images/{name}/push');
     }
 
-    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, string $contentType = null): PushStream|EventsGetResponse200|null
+    protected function transformResponseBody(ResponseInterface $response, SerializerInterface $serializer, ?string $contentType = null): PushStream|EventsGetResponse200|null
     {
         if ($response->getStatusCode() === 200) {
             return new PushStream(Stream::create($response->getBody()), $serializer);

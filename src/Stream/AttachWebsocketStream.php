@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Docker\Stream;
 
 use Psr\Http\Message\StreamInterface;
+
 use function Safe\fwrite;
+
 /**
  * An interactive stream is used when communicating with an attached docker container.
  *
@@ -89,7 +91,7 @@ class AttachWebsocketStream
      *
      * @return false|string|array{}|null Null for socket not available, false for no message, string for the last message and the frame array if $getFrame is set to true
      */
-    public function read(int $waitTime = 0,int  $waitMicroTime = 200000, bool $getFrame = false): false|string|array|null
+    public function read(int $waitTime = 0, int $waitMicroTime = 200000, bool $getFrame = false): false|string|array|null
     {
         if (!\is_resource($this->socket) || \feof($this->socket)) {
             return null;
@@ -150,8 +152,6 @@ class AttachWebsocketStream
 
     /**
      * Force to have something of the expected size (block).
-     *
-     * @return string
      */
     private function socketRead(int $length): string
     {
@@ -159,7 +159,7 @@ class AttachWebsocketStream
         assert($this->socket !== null);
         do {
             $chunckLength = $length - \strlen($read);
-            assert($chunckLength>0);
+            assert($chunckLength > 0);
             $read .= \fread($this->socket, $chunckLength);
         } while (\strlen($read) < $length && !\feof($this->socket));
 
@@ -168,12 +168,11 @@ class AttachWebsocketStream
 
     /**
      * Write to the socket.
-     *
-     * @return int
      */
     private function socketWrite(string $data): int
     {
         assert($this->socket !== null);
+
         return fwrite($this->socket, $data);
     }
 }

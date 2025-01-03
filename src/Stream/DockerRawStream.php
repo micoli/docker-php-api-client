@@ -88,7 +88,7 @@ class DockerRawStream
     /**
      * Force to have something of the expected size (block).
      */
-    private function forceRead(int $length):string
+    private function forceRead(int $length): string
     {
         $read = '';
 

@@ -16,7 +16,7 @@ class ExecStart extends \Docker\API\Runtime\Client\BaseEndpoint implements \Dock
      *
      * @param string $id Exec instance ID
      */
-    public function __construct(string $id, \Docker\API\Model\ExecIdStartPostBody $requestBody = null)
+    public function __construct(string $id, ?\Docker\API\Model\ExecIdStartPostBody $requestBody = null)
     {
         $this->id = $id;
         $this->body = $requestBody;
@@ -49,7 +49,7 @@ class ExecStart extends \Docker\API\Runtime\Client\BaseEndpoint implements \Dock
     /**
      * @return null
      */
-    protected function transformResponseBody(\Psr\Http\Message\ResponseInterface $response, \Symfony\Component\Serializer\SerializerInterface $serializer, string $contentType = null)
+    protected function transformResponseBody(\Psr\Http\Message\ResponseInterface $response, \Symfony\Component\Serializer\SerializerInterface $serializer, ?string $contentType = null)
     {
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();

@@ -16,7 +16,7 @@ class ContainerCreate extends \Docker\API\Runtime\Client\BaseEndpoint implements
      *
      * }
      */
-    public function __construct(\Docker\API\Model\ContainersCreatePostBody $requestBody = null, array $queryParameters = [])
+    public function __construct(?\Docker\API\Model\ContainersCreatePostBody $requestBody = null, array $queryParameters = [])
     {
         $this->body = $requestBody;
         $this->queryParameters = $queryParameters;
@@ -68,7 +68,7 @@ class ContainerCreate extends \Docker\API\Runtime\Client\BaseEndpoint implements
      *
      * @return \Docker\API\Model\ContainersCreatePostResponse201|null
      */
-    protected function transformResponseBody(\Psr\Http\Message\ResponseInterface $response, \Symfony\Component\Serializer\SerializerInterface $serializer, string $contentType = null)
+    protected function transformResponseBody(\Psr\Http\Message\ResponseInterface $response, \Symfony\Component\Serializer\SerializerInterface $serializer, ?string $contentType = null)
     {
         $status = $response->getStatusCode();
         $body = (string) $response->getBody();

@@ -32,7 +32,7 @@ class HostConfigLogConfigNormalizer implements DenormalizerInterface, Normalizer
         return is_object($data) && $data::class === 'Docker\\API\\Model\\HostConfigLogConfig';
     }
 
-    public function denormalize($data, $class, $format = null, array $context = [])
+    public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): mixed
     {
         if (isset($data['$ref'])) {
             return new Reference($data['$ref'], $context['document-origin']);
@@ -72,7 +72,7 @@ class HostConfigLogConfigNormalizer implements DenormalizerInterface, Normalizer
     /**
      * @return array|string|int|float|bool|ArrayObject|null
      */
-    public function normalize($object, $format = null, array $context = [])
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
         $data = [];
         if ($object->isInitialized('type') && $object->getType() !== null) {
@@ -94,7 +94,7 @@ class HostConfigLogConfigNormalizer implements DenormalizerInterface, Normalizer
         return $data;
     }
 
-    public function getSupportedTypes(string $format = null): array
+    public function getSupportedTypes(?string $format = null): array
     {
         return ['Docker\\API\\Model\\HostConfigLogConfig' => false];
     }
